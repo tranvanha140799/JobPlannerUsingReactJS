@@ -3,7 +3,11 @@ import './App.css';
 import JobForm from './components/JobForm';
 import Control from './components/Control';
 import JobList from './components/JobList';
+<<<<<<< Updated upstream
 import _ from 'lodash'; // import toàn bộ thư viện lodash vào project
+=======
+import _ from 'lodash';
+>>>>>>> Stashed changes
 
 class App extends React.Component {
     constructor(props) {

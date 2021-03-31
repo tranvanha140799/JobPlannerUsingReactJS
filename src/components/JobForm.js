@@ -24,9 +24,9 @@ class JobForm extends Component {
     UNSAFE_componentWillReceiveProps(nextProps) { // Hàm lifecycle chạy liên tục khi form vẫn còn được mở (đang dần dần bị loại bỏ)
         if(nextProps && nextProps.job) {
             this.setState({
-                id: nextProps.job. id,
-                name: nextProps.job. name,
-                status: nextProps.job. status
+                id: nextProps.job.id,
+                name: nextProps.job.name,
+                status: nextProps.job.status
             });
         }
     }

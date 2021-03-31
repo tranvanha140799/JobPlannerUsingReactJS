@@ -3,6 +3,7 @@ import './App.css';
 import JobForm from './components/JobForm';
 import Control from './components/Control';
 import JobList from './components/JobList';
+import _ from 'lodash'; // import toàn bộ thư viện lodash vào project
 
 class App extends React.Component {
     constructor(props) {
@@ -10,7 +11,14 @@ class App extends React.Component {
         this.state = {
             jobs: [],
             isDisplayForm: false, // state ẩn/hiện form thêm, sửa
-            jobEditing: null
+            jobEditing: null,
+            filter: {
+                name: '',
+                status: -1
+            },
+            keyword: '',
+            sortBy: 'name',
+            sortValue: 1
         };
         // this.onGenerateData = this.onGenerateData.bind(this);
         this.s4 = this.s4.bind(this);
@@ -87,7 +95,10 @@ class App extends React.Component {
 
     onUpdateStatus = (id) => {
         var { jobs } = this.state;
-        var index = this.findIndex(id);
+        // var index = this.findIndex(id);
+        var index = _.findIndex(jobs, (job) => {
+            return job.id === id;
+        });
         if(index !== -1) {
             jobs[index].status = !jobs[index].status;
         }
@@ -124,14 +135,81 @@ class App extends React.Component {
         this.setState({isDisplayForm: true});
     }
 
+    onFilter = (filterName, filterStatus) => {
+        filterName = filterName.toLowerCase();
+        filterStatus = parseInt(filterStatus);
+        this.setState({
+            filter: {
+                name: filterName,
+                status: filterStatus
+            }
+        });
+    }
+
+    onSearch = (keyword) => {
+        this.setState({
+            keyword: keyword
+        });
+    }
+
+    onSort = (sortBy, sortValue) => {
+        this.setState({
+            sortBy: sortBy,
+            sortValue: sortValue
+        });
+    }
+
     render() {
-        var { jobs, isDisplayForm, jobEditing } = this.state; // Cú pháp IS6
+        var { jobs, isDisplayForm, jobEditing, filter, keyword, sortBy, sortValue } = this.state; // Cú pháp IS6
         var elementDisplayForm = isDisplayForm
         ? <JobForm
             onSubmit={ this.onSubmit }
             onCloseForm={ this.onCloseForm }
             job={ jobEditing }/>
         : '';
+
+        if(filter) {
+            if(filter.name) {
+                jobs = jobs.filter((job) => {
+                    return job.name.toLowerCase().indexOf(filter.name) !== -1;
+                });
+            }
+            if(filter.status !== -1) {
+                jobs = jobs.filter((job) => {
+                    return job.status === (filter.status === 1 ? true : false);
+                });
+            }
+        }
+
+        if(keyword) {
+            // jobs = jobs.filter((job) => {
+            //     return job.name.toLowerCase().indexOf(keyword) !== -1;
+            // });
+            jobs = _.filter(jobs, (job) => {
+                return job.name.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
+            });
+        }
+
+        if(sortBy === 'name') {
+            jobs.sort((a, b) => {
+                if(a.name > b.name)
+                    return sortValue;
+                else if(a.name < b.name)
+                    return -sortValue;
+                else
+                    return 0;
+            });
+        }
+        else {
+            jobs.sort((a, b) => {
+                if(a.status > b.status)
+                    return -sortValue;
+                else if(a.status < b.status)
+                    return sortValue;
+                else
+                    return 0;
+            });
+        }
 
         return (
             <div className="container">
@@ -153,11 +231,22 @@ class App extends React.Component {
                             Generate data
                         </button>*/}
                     {/* Search - Sort */}
-                        <Control />
+                        <Control
+                            onSearch={ this.onSearch }
+                            onSort={ this.onSort }
+                            sortBy={ sortBy }
+                            sortValue={ sortValue }
+                        />
                     {/* List */}
                         <div className="row mt-15">
                             <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                <JobList jobs={ jobs } onUpdateStatus={ this.onUpdateStatus }  onDeleteJob={ this.onDeleteJob } onUpdate={ this.onUpdate }/>
+                                <JobList
+                                    jobs={ jobs }
+                                    onUpdateStatus={ this.onUpdateStatus }
+                                    onDeleteJob={ this.onDeleteJob }
+                                    onUpdate={ this.onUpdate }
+                                    onFilter={ this.onFilter }
+                                />
                             </div>
                         </div>
                     </div>
